@@ -1,14 +1,4 @@
-const player = (name, symbol) => {
-  return {
-    name,
-    symbol,
-  };
-};
-
-let gameBoard = ["", "", "", "", "", "", "", "", ""];
-const boardGridElements = document.querySelectorAll("#gameBoard div");
-
-const winnerAxis = [
+const WINNERAXIS = [
   [0, 1, 2],
   [3, 4, 5],
   [6, 7, 8],
@@ -18,6 +8,29 @@ const winnerAxis = [
   [0, 4, 8],
   [2, 4, 6],
 ];
+
+const player = (name, symbol) => {
+  return {
+    name,
+    symbol,
+  };
+};
+
+// BOARD
+
+let gameBoard = ["", "", "", "", "", "", "", "", ""];
+
+const boardGridElements = document.querySelectorAll("#gameBoard div");
+
+function giveCellFunctionality() {
+  boardGridElements.forEach((square) => {
+    square.addEventListener("click", round);
+  });
+}
+
+giveCellFunctionality();
+
+// PLAYERS
 
 const player1 = player("Player 1", "X");
 const player2 = player("Player 2", "O");
@@ -38,14 +51,8 @@ function newGame() {
     square.textContent = "";
   });
 
-  boardGridElements.forEach((square) => {
-    square.addEventListener("click", round);
-  });
+  giveCellFunctionality();
 }
-
-boardGridElements.forEach((square) => {
-  square.addEventListener("click", round);
-});
 
 //
 
@@ -59,7 +66,7 @@ function updateGameBoard() {
 }
 
 function checkWinner() {
-  for (const axis of winnerAxis) {
+  for (const axis of WINNERAXIS) {
     if (gameBoard[axis[0]] === currentPlayer.symbol && gameBoard[axis[1]] === currentPlayer.symbol && gameBoard[axis[2]] === currentPlayer.symbol) {
       return true;
     }
@@ -81,9 +88,6 @@ function gameOver() {
     boardGridElements.forEach((square) => {
       square.removeEventListener("click", round);
     });
-
-    const board = document.querySelector("#gameBoard");
-    board.disabled = true;
 
     playerTurn.textContent = `${currentPlayer.name} is the winner!`;
   } else {
