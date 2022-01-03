@@ -1,125 +1,148 @@
-const WINNERAXIS = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
-
 const player = (name, symbol) => {
-  return {
-    name,
-    symbol,
-  };
+  return { name, symbol };
 };
 
-// BOARD
+const gameBoard = (() => {
+  const grid = ["", "", "", "", "", "", "", "", ""];
 
-let gameBoard = ["", "", "", "", "", "", "", "", ""];
+  // Add to grid
+  const addToBoard = (index, symbol) => (grid[index] = symbol);
 
-const boardGridElements = document.querySelectorAll("#gameBoard div");
+  const isEmpty = (index) => {
+    // Checks if the space is empty
+    return grid[index] === "";
+  };
 
-function giveCellFunctionality() {
-  boardGridElements.forEach((square) => {
-    square.addEventListener("click", round);
-  });
-}
-
-giveCellFunctionality();
-
-// PLAYERS
-
-const player1 = player("Player 1", "X");
-const player2 = player("Player 2", "O");
-
-let currentPlayer = player1;
-
-const playerTurn = document.querySelector(".playerTurn");
-
-const newGameBtn = document.querySelector(".new-game");
-newGameBtn.addEventListener("click", newGame);
-
-function newGame() {
-  currentPlayer = player1;
-  playerTurn.textContent = `${currentPlayer.name} turn`;
-  gameBoard = ["", "", "", "", "", "", "", "", ""];
-
-  boardGridElements.forEach((square) => {
-    square.textContent = "";
-  });
-
-  giveCellFunctionality();
-}
-
-//
-
-function fillSquare() {
-  this.textContent = currentPlayer.symbol;
-}
-
-function updateGameBoard() {
-  gameBoard[this.id] = currentPlayer.symbol;
-  console.log(gameBoard);
-}
-
-function checkWinner() {
-  for (const axis of WINNERAXIS) {
-    if (gameBoard[axis[0]] === currentPlayer.symbol && gameBoard[axis[1]] === currentPlayer.symbol && gameBoard[axis[2]] === currentPlayer.symbol) {
-      return true;
+  const isBoardFull = () => {
+    // Checks if the board is full
+    for (const space of grid) {
+      if (space === "") return false;
     }
-  }
+    return true;
+  };
 
-  return false;
-}
+  // WIN CONDITIONS
+  const WINNER_AXIS = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
 
-function isBoardFull() {
-  for (const cell of gameBoard) {
-    if (cell === "") return false;
-  }
+  const checkForWin = (symbol) => {
+    // Check if there's a win condition
+    for (const axis of WINNER_AXIS) {
+      if (grid[axis[0]] === symbol && grid[axis[1]] === symbol && grid[axis[2]] === symbol) {
+        return axis;
+      }
+    }
+    return false;
+  };
 
-  return true;
-}
+  const reset = () => {
+    // Empties Grid
+    for (let i = 0; i < grid.length; i++) grid[i] = "";
+  };
 
-function gameOver() {
-  if (checkWinner()) {
-    boardGridElements.forEach((square) => {
-      square.removeEventListener("click", round);
+  return { addToBoard, isEmpty, isBoardFull, checkForWin, reset };
+})();
+
+const displayController = (() => {
+  const player = document.querySelector(".playerName");
+  const updatePlayer = (current) => (player.textContent = current.name);
+
+  const result = document.querySelector(".result");
+  const showResult = (text) => {
+    result.textContent = text;
+    result.style.display = "block";
+  };
+
+  const hideResult = () => {
+    result.style.display = "none";
+  };
+
+  return { updatePlayer, showResult, hideResult };
+})();
+
+const game = (() => {
+  // BOARD OBJECT
+  const board = gameBoard;
+
+  // PLAYER OBJECT
+  const player1 = player("Player 1", "X");
+  const player2 = player("Player 2", "O");
+
+  // DISPLAY CONTROLLER OBJECT
+  const display = displayController;
+
+  // GAME
+  let activePlayer = player1;
+
+  display.updatePlayer(activePlayer);
+
+  const switchPlayer = () => (activePlayer === player1 ? (activePlayer = player2) : (activePlayer = player1));
+
+  const isGameOver = () => {
+    // Checks if game should end
+    return board.isBoardFull() || board.checkForWin(activePlayer.symbol);
+  };
+
+  const endGame = () => {
+    const winner_axis = board.checkForWin(activePlayer.symbol);
+
+    if (winner_axis) {
+      for (const axis of winner_axis) {
+        const space = document.getElementById(`${axis}`);
+        space.classList.add("win");
+      }
+      displayController.showResult(`${activePlayer.name} is the winner!`);
+    } else if (board.isBoardFull()) {
+      displayController.showResult("It's a tie!");
+    }
+  };
+
+  // Event Listeners
+  const boardGridElements = document.querySelectorAll("#gameBoard div");
+
+  boardGridElements.forEach((element) => {
+    element.addEventListener("click", () => {
+      const id = element.id; // Number ID of the clicked div
+      if (!board.isEmpty(id) || isGameOver()) return;
+
+      board.addToBoard(id, activePlayer.symbol);
+      element.textContent = activePlayer.symbol; // Add player move to DOM
+
+      // Check if game is over
+      if (isGameOver()) {
+        endGame();
+      } else {
+        switchPlayer();
+        display.updatePlayer(activePlayer);
+      }
     });
+  });
 
-    playerTurn.textContent = `${currentPlayer.name} is the winner!`;
-  } else {
-    playerTurn.textContent = "It's a tie!";
-  }
-}
+  const cleanGrid = () => {
+    // Empties the grid
+    boardGridElements.forEach((element) => {
+      element.textContent = "";
+      element.classList.remove("win");
+    });
+  };
 
-//
+  const newGame = () => {
+    // Starts a new game
+    cleanGrid();
+    board.reset();
+    activePlayer = player1;
+    displayController.hideResult();
+    display.updatePlayer(activePlayer);
+  };
 
-function round() {
-  // Fill cell
-  if (gameBoard[this.id] != "") {
-    return;
-  } else {
-    fillSquare.call(this);
-  }
-
-  // Update gameBoard array
-  updateGameBoard.call(this);
-
-  // Check for winner and if board is full
-  if (checkWinner() || isBoardFull()) {
-    return gameOver();
-  }
-
-  // Change Player
-  if (currentPlayer === player1) {
-    currentPlayer = player2;
-  } else {
-    currentPlayer = player1;
-  }
-
-  // Update current player in DOM
-  playerTurn.textContent = `${currentPlayer.name} turn`;
-}
+  const newGameBtn = document.querySelector(".new-game");
+  newGameBtn.addEventListener("click", newGame);
+})();

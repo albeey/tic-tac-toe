@@ -11,9 +11,6 @@ body {
   background-color: var(--content-bg);
   font-family: "Merriweather", serif;
   height: 100vh;
-  /* display: flex;
-  flex-direction: column;
-  align-items: center; */
   overflow: hidden;
 }
 
@@ -48,6 +45,10 @@ body {
   margin: 10px;
 }
 
+.result {
+  display: none;
+}
+
 button {
   color: #6d6875;
   font-weight: bold;
@@ -80,4 +81,21 @@ button:active {
   justify-content: center;
   align-items: center;
   font-size: 200px;
+}
+
+.win {
+  color: #fff;
+  animation: blinking-background 2s ease-in infinite;
+}
+
+@keyframes blinking-background {
+  0% {
+    background-color: #bfacc8;
+  }
+  50% {
+    background-color: #c8b8d1;
+  }
+  100% {
+    background-color: #bfacc8;
+  }
 }
