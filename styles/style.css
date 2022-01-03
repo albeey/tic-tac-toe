@@ -81,21 +81,22 @@ button:active {
   justify-content: center;
   align-items: center;
   font-size: 200px;
+  font-family: "Lato", sans-serif;
 }
 
 .win {
   color: #fff;
-  animation: blinking-background 2s ease-in infinite;
+  animation: blinking-background 2s ease-in-out infinite;
 }
 
 @keyframes blinking-background {
   0% {
-    background-color: #bfacc8;
+    background-color: #c3b0cc;
   }
   50% {
     background-color: #c8b8d1;
   }
   100% {
-    background-color: #bfacc8;
+    background-color: #c3b0cc;
   }
 }

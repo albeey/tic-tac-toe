@@ -56,16 +56,12 @@ const displayController = (() => {
   const updatePlayer = (current) => (player.textContent = current.name);
 
   const result = document.querySelector(".result");
-  const showResult = (text) => {
+  const displayResult = (text) => {
     result.textContent = text;
     result.style.display = "block";
   };
 
-  const hideResult = () => {
-    result.style.display = "none";
-  };
-
-  return { updatePlayer, showResult, hideResult };
+  return { updatePlayer, displayResult };
 })();
 
 const game = (() => {
@@ -92,16 +88,19 @@ const game = (() => {
   };
 
   const endGame = () => {
+    // Ends the game and announces the winner
     const winner_axis = board.checkForWin(activePlayer.symbol);
 
     if (winner_axis) {
+      // Add win class to winner axis
       for (const axis of winner_axis) {
         const space = document.getElementById(`${axis}`);
         space.classList.add("win");
       }
-      displayController.showResult(`${activePlayer.name} is the winner!`);
-    } else if (board.isBoardFull()) {
-      displayController.showResult("It's a tie!");
+      // Text to display
+      displayController.displayResult(`${activePlayer.name} is the winner!`);
+    } else {
+      displayController.displayResult("It's a tie!");
     }
   };
 
@@ -139,7 +138,7 @@ const game = (() => {
     cleanGrid();
     board.reset();
     activePlayer = player1;
-    displayController.hideResult();
+    displayController.displayResult("");
     display.updatePlayer(activePlayer);
   };
 
