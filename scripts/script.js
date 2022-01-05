@@ -5,15 +5,15 @@ const player = (name, symbol) => {
 const gameBoard = (() => {
   const grid = ["", "", "", "", "", "", "", "", ""];
 
-  // Add to grid
-  const addToBoard = (index, symbol) => (grid[index] = symbol);
+  // Fill space in the grid
+  const addToSpace = (position, symbol) => (grid[position] = symbol);
 
-  const isEmpty = (index) => {
-    // Checks if the space is empty
-    return grid[index] === "";
+  const isSpaceEmpty = (spaceIdx) => {
+    // Checks if the space in the grid is empty
+    return grid[spaceIdx] === "";
   };
 
-  const isBoardFull = () => {
+  const isFull = () => {
     // Checks if the board is full
     for (const space of grid) {
       if (space === "") return false;
@@ -33,7 +33,7 @@ const gameBoard = (() => {
     [2, 4, 6],
   ];
 
-  const checkForWin = (symbol) => {
+  const isThereAWinner = (symbol) => {
     // Check if there's a win condition
     for (const axis of WINNER_AXIS) {
       if (grid[axis[0]] === symbol && grid[axis[1]] === symbol && grid[axis[2]] === symbol) {
@@ -48,7 +48,7 @@ const gameBoard = (() => {
     for (let i = 0; i < grid.length; i++) grid[i] = "";
   };
 
-  return { addToBoard, isEmpty, isBoardFull, checkForWin, reset };
+  return { addToSpace, isSpaceEmpty, isFull, isThereAWinner, reset };
 })();
 
 const displayController = (() => {
@@ -84,12 +84,12 @@ const game = (() => {
 
   const isGameOver = () => {
     // Checks if game should end
-    return board.isBoardFull() || board.checkForWin(activePlayer.symbol);
+    return board.isFull() || board.isThereAWinner(activePlayer.symbol);
   };
 
   const endGame = () => {
     // Ends the game and announces the winner
-    const winner_axis = board.checkForWin(activePlayer.symbol);
+    const winner_axis = board.isThereAWinner(activePlayer.symbol);
 
     if (winner_axis) {
       // Add win class to winner axis
@@ -110,9 +110,9 @@ const game = (() => {
   boardGridElements.forEach((element) => {
     element.addEventListener("click", () => {
       const id = element.id; // Number ID of the clicked div
-      if (!board.isEmpty(id) || isGameOver()) return;
+      if (!board.isSpaceEmpty(id) || isGameOver()) return;
 
-      board.addToBoard(id, activePlayer.symbol);
+      board.addToSpace(id, activePlayer.symbol);
       element.textContent = activePlayer.symbol; // Add player move to DOM
 
       // Check if game is over
